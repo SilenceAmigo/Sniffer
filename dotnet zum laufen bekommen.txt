@@ -1,0 +1,11 @@
+dotnet zum laufen bekommen
+
+Programm zum laufen bekommen 
+dotnet run
+
+
+Programm Debugen
+Linke seite auf das Debug zeichen, anschließend den Runbutton der erscheint klicken
+
+Compile -> eine exe erstellen 
+dotnet build Netzwerkscanner.csproj
