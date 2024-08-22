@@ -202,19 +202,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Dominik\\.nuget\\packages\\": {}
+    "C:\\Users\\dominikus\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Dominik\\Documents\\Netzwerkscanner\\Netzwerkscanner.csproj",
+      "projectUniqueName": "C:\\Users\\dominikus\\Documents\\Sniffer\\Sniffer\\Netzwerkscanner.csproj",
       "projectName": "Netzwerkscanner",
-      "projectPath": "C:\\Users\\Dominik\\Documents\\Netzwerkscanner\\Netzwerkscanner.csproj",
-      "packagesPath": "C:\\Users\\Dominik\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Dominik\\Documents\\Netzwerkscanner\\obj\\",
+      "projectPath": "C:\\Users\\dominikus\\Documents\\Sniffer\\Sniffer\\Netzwerkscanner.csproj",
+      "packagesPath": "C:\\Users\\dominikus\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\dominikus\\Documents\\Sniffer\\Sniffer\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Dominik\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\dominikus\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -268,7 +268,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.401/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
