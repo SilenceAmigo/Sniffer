@@ -4,251 +4,308 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Net.Http;
 
 class SubnetIpNetworkSniffer
 {
-    [DllImport("iphlpapi.dll", ExactSpelling = true)]
-    private static extern int SendARP(int destIp, int srcIp, byte[] macAddr, ref int physicalAddrLen);
-    private static int count;
+	[DllImport("iphlpapi.dll", ExactSpelling = true)]
+	private static extern int SendARP(int destIp, int srcIp, byte[] macAddr, ref int physicalAddrLen);
+	private static int count;
 
-    public static void Main(string[] args)
-    {
-        var (localIP, subnetMask, gateway) = GetLocalIPAddressAndSubnetMask();
-        if (localIP == null || subnetMask == null)
-        {
-            Console.WriteLine("Keine lokale IP-Adresse oder Subnetzmaske gefunden.");
-            return;
-        }
+	public static async Task Main(string[] args)
+	{
+		// Benutzerabfrage
+		Console.WriteLine("Möchten Sie alle Informationen (IP-Adresse, MAC-Adresse, Hostname und Hersteller) sehen? (y/n):");
+		string input = Console.ReadLine().Trim().ToLower();
+		bool showAllInfo = input == "y";
 
-        int subnetzSize = 0;
-        foreach (int octet in subnetMask)
-        {
-            string binaryOctet = Convert.ToString(octet, 2).PadLeft(8, '0');
-            foreach (char bit in binaryOctet)
-            {
-                if (bit == '1')
-                {
-                    subnetzSize++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
+		var (localIP, subnetMask, gateway) = GetLocalIPAddressAndSubnetMask();
+		if (localIP == null || subnetMask == null)
+		{
+			Console.WriteLine("Keine lokale IP-Adresse oder Subnetzmaske gefunden.");
+			return;
+		}
 
-        int maxOctetSize = 32;
-        int maxSubnetzSize = maxOctetSize - subnetzSize;
-        int numOfIps = (int)Math.Pow(2, maxSubnetzSize); // Berechnung der Größe des Subnetzes
+		int subnetzSize = 0;
+		foreach (int octet in subnetMask)
+		{
+			string binaryOctet = Convert.ToString(octet, 2).PadLeft(8, '0');
+			foreach (char bit in binaryOctet)
+			{
+				if (bit == '1')
+				{
+					subnetzSize++;
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
 
-        string subnet = GetSubnet(localIP);  // nur da für die ausgabe vieleicht auch noch anders lösbar 
-        int[] subnetArray = GetSubnetArray(localIP);
-        Console.WriteLine($"IP-Adresse: {localIP} -> Subnetz: {subnet}0/{subnetzSize}");
-        Console.WriteLine($"Gateway: {gateway}");
+		int maxOctetSize = 32;
+		int maxSubnetzSize = maxOctetSize - subnetzSize;
+		int numOfIps = (int)Math.Pow(2, maxSubnetzSize);
 
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
+		string subnet = GetSubnet(localIP);
+		int[] subnetArray = GetSubnetArray(localIP);
+		Console.WriteLine($"IP-Adresse: {localIP} -> Subnetz: {subnet}0/{subnetzSize}");
+		Console.WriteLine($"Gateway: {gateway}");
 
-        var foundDevices = ARPSweep(numOfIps, subnetArray);
+		Stopwatch stopwatch = new Stopwatch();
+		stopwatch.Start();
 
-        stopwatch.Stop();
+		var foundDevices = await ARPSweep(numOfIps, subnetArray, showAllInfo);
 
-        // Sortiere die Geräte nach IP-Adresse
-        foundDevices = foundDevices.OrderBy(device => IPAddress.Parse(device.Key).GetAddressBytes(), new ByteArrayComparer()).ToList();
+		stopwatch.Stop();
 
-        Console.WriteLine("\nGefundene Geräte sortiert nach IP-Adresse:");
-        foreach (var device in foundDevices)
-        {
-            string hostname = GetHostName(device.Key);
-            Console.WriteLine($"Gerät gefunden: {device.Key}, MAC-Adresse: {device.Value}, Hostname: {hostname}");
-        }
+		Console.WriteLine("\nGefundene Geräte sortiert nach IP-Adresse:");
+		foreach (var device in foundDevices)
+		{
+			string hostname = GetHostName(device.Key);
+			if (showAllInfo)
+			{
+				Console.WriteLine($"Gerät gefunden: {device.Key}, MAC-Adresse: {device.Value.MacAddress}, \n\nHostname: {hostname}, Hersteller: {device.Value.Manufacturer}");
+			}
+			else
+			{
+				Console.WriteLine($"Gerät gefunden: {device.Key}, MAC-Adresse: {device.Value.MacAddress}, Hostname: {hostname}");
+			}
+		}
 
-        Console.WriteLine($"\n{count} Hosts gefunden");
-        Console.WriteLine($"Zeit für den ARP-Sweep: {stopwatch.Elapsed.TotalSeconds:F2} s");
-        Console.WriteLine($"Gateway: {gateway}");
-    }
+		Console.WriteLine($"\n{count} Hosts gefunden");
+		Console.WriteLine($"Zeit für den ARP-Sweep: {stopwatch.Elapsed.TotalSeconds:F2} s");
+		Console.WriteLine($"Gateway: {gateway}");
+	}
 
-    public static void GetARPTable()
-    {
-        Process process = new Process();
-        process.StartInfo.FileName = "arp";
-        process.StartInfo.Arguments = "-a";
-        process.StartInfo.RedirectStandardOutput = true;
-        process.StartInfo.UseShellExecute = false;
-        process.StartInfo.CreateNoWindow = true;
-        process.Start();
+	static async Task<SortedDictionary<string, (string MacAddress, string Manufacturer)>> ARPSweep(int numOfIps, int[] subnetArray, bool showAllInfo)
+	{
+		var foundDevices = new SortedDictionary<string, (string MacAddress, string Manufacturer)>();
+		int j = 0;
+		int k = 0;
 
-        string output = process.StandardOutput.ReadToEnd();
-        process.WaitForExit();
+		if (numOfIps == 0)
+		{
+			return foundDevices;
+		}
 
-        Console.WriteLine(output);
-    }
+		if (showAllInfo)
+		{
+			await Parallel.ForEachAsync(Enumerable.Range(1, 254), async (i, _) =>
+			{
+				string subnet = string.Join(".", subnetArray.Take(subnetArray.Length - 1));
+				string ip = $"{subnet}.{i}";
+				IPAddress ipAddress;
 
-    static List<KeyValuePair<string, string>> ARPSweep(int numOfIps, int[] subnetArray)
-    {
-        var foundDevices = new List<KeyValuePair<string, string>>();
-        int j = 0;
-        int k = 0;
-        Console.WriteLine(numOfIps);
+				try
+				{
+					ipAddress = IPAddress.Parse(ip);
+				}
+				catch (FormatException)
+				{
+					return;
+				}
 
-        if (numOfIps == 0)
-        {
-            return foundDevices;
-        }
+				byte[] macAddr = new byte[6];
+				int len = macAddr.Length;
 
-        Parallel.For(1, 255, i => // bedeutet ip adresse von 1 bis 254
-        {
-            Console.WriteLine(i);
+				try
+				{
+					int result = SendARP(BitConverter.ToInt32(ipAddress.GetAddressBytes(), 0), 0, macAddr, ref len);
 
-            string subnet = string.Join(".", subnetArray.Take(subnetArray.Length - 1));
-            string ip = $"{subnet}.{i}";
-            IPAddress ipAddress;
+					if (result == 0)
+					{
+						var macAddress = FormatMacAddress(macAddr);
+						string manufacturer = "Unbekannt";
 
-            if (i == 254)  // "255 -> Brodcast" "1-254 -> 254 pro Octette"
-            {
-                k++;
-                Console.WriteLine($"{ip}   ->   {i} ");
-            }
+						if (showAllInfo)
+						{
+							manufacturer = await GetManufacturerFromMac(macAddress);
+						}
 
-            try
-            {
-                ipAddress = IPAddress.Parse(ip);
-            }
-            catch (FormatException)
-            {
-                return;
-            }
+						lock (foundDevices)
+						{
+							j++;
+							Console.WriteLine($"{j}: Host gefunden");
+							if (!foundDevices.ContainsKey(ip))
+							{
+								foundDevices.Add(ip, (macAddress, manufacturer));
+								count++;
+							}
+						}
+					}
+				}
+				catch
+				{
+				}
+			});
+		}
+		else
+		{
+			Parallel.For(1, 255, i => // bedeutet ip adresse von 1 bis 254
+			{
+				string subnet = string.Join(".", subnetArray.Take(subnetArray.Length - 1));
+				string ip = $"{subnet}.{i}";
+				IPAddress ipAddress;
 
-            byte[] macAddr = new byte[6];
-            int len = macAddr.Length;
+				if (i == 254)  // "255 -> Brodcast" "1-254 -> 254 pro Octette"
+				{
+					k++;
+				}
 
-            try
-            {
-                int result = SendARP(BitConverter.ToInt32(ipAddress.GetAddressBytes(), 0), 0, macAddr, ref len);
+				try
+				{
+					ipAddress = IPAddress.Parse(ip);
+				}
+				catch (FormatException)
+				{
+					return;
+				}
 
-                if (result == 0)
-                {
-                    var macAddress = FormatMacAddress(macAddr);
+				byte[] macAddr = new byte[6];
+				int len = macAddr.Length;
 
-                    lock (foundDevices)
-                    {
-                        j++;
-                        Console.WriteLine($"{j}: Host gefunden");
-                        if (!foundDevices.Any(device => device.Key == ip))
-                        {
-                            foundDevices.Add(new KeyValuePair<string, string>(ip, macAddress));
-                            count++;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Fehler beim Senden von ARP-Request für {ip}: {ex.Message}");
-            }
-        });
+				try
+				{
+					int result = SendARP(BitConverter.ToInt32(ipAddress.GetAddressBytes(), 0), 0, macAddr, ref len);
 
-        if (k > 0) //255.255.255.0???
-        {
-            subnetArray[2] = subnetArray[2] - 1; // 255.255.254.0
-            if (subnetArray[2] < 0) // 255.255.0.0???
-            {
-                subnetArray[1] = subnetArray[1] - 1; // 255.254.0.0
-                subnetArray[2] = 255; // 255.254.255.0    nach dem man 1 mal runtergezählt hat wieder vorne anfangen
-                if (subnetArray[1] < 0) // 255.0.255.0???
-                {
-                    subnetArray[0] = subnetArray[0] - 1;
-                    subnetArray[1] = 255;
-                    if (subnetArray[0] < 0)
-                    {
-                        return foundDevices;
-                    }
-                }
-            }
-            foundDevices.AddRange(ARPSweep(numOfIps - 256, subnetArray));
-            k = 0;
-        }
+					if (result == 0)
+					{
+						var macAddress = FormatMacAddress(macAddr);
 
-        return foundDevices;
-    }
+						lock (foundDevices)
+						{
+							j++;
+							Console.WriteLine($"{j}: Host gefunden");
+							if (!foundDevices.ContainsKey(ip))
+							{
+								foundDevices.Add(ip, (macAddress, "Unbekannt"));
+								count++;
+							}
+						}
+					}
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Fehler beim Senden von ARP-Request für {ip}: {ex.Message}");
+				}
+			});
+		}
 
-    static (string, int[], string) GetLocalIPAddressAndSubnetMask()
-    {
-        foreach (var ni in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
-        {
-            if (ni.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up)
-            {
-                foreach (var ua in ni.GetIPProperties().UnicastAddresses)
-                {
-                    if (ua.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                    {
-                        string ipAddress = ua.Address.ToString();
-                        string subnetMask = ua.IPv4Mask.ToString();
-                        string gateway = ni.GetIPProperties().GatewayAddresses.FirstOrDefault()?.Address.ToString();
-                        int[] subnetMaskArray = subnetMask.Split('.').Select(int.Parse).ToArray();
-                        return (ipAddress, subnetMaskArray, gateway);
-                    }
-                }
-            }
-        }
-        return (null, null, null);
-    }
+		if (k > 0)
+		{
+			subnetArray[2] = subnetArray[2] - 1;
+			if (subnetArray[2] < 0)
+			{
+				subnetArray[1] = subnetArray[1] - 1;
+				subnetArray[2] = 255;
+				if (subnetArray[1] < 0)
+				{
+					subnetArray[0] = subnetArray[0] - 1;
+					subnetArray[1] = 255;
+					if (subnetArray[0] < 0)
+					{
+						return foundDevices;
+					}
+				}
+			}
+			foundDevices = await ARPSweep(numOfIps - 256, subnetArray, showAllInfo);
+			k = 0;
+		}
 
-    static string GetSubnet(string ipAddress) // funktion später unnötig
-    {
-        var segments = ipAddress.Split('.');
-        if (segments.Length == 4)
-        {
-            return $"{segments[0]}.{segments[1]}.{segments[2]}.";
-        }
-        else
-        {
-            throw new FormatException("Invalid IP address format.");
-        }
-    }
+		return foundDevices;
+	}
 
-    static int[] GetSubnetArray(string ipAddress)
-    {
-        var segments = ipAddress.Split('.');
-        if (segments.Length == 4)
-        {
-            return segments.Select(s => int.Parse(s)).ToArray();
-        }
-        else
-        {
-            throw new FormatException("Invalid IP address format.");
-        }
-    }
+	static (string, int[], string) GetLocalIPAddressAndSubnetMask()
+	{
+		foreach (var ni in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
+		{
+			if (ni.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up)
+			{
+				foreach (var ua in ni.GetIPProperties().UnicastAddresses)
+				{
+					if (ua.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+					{
+						string ipAddress = ua.Address.ToString();
+						string subnetMask = ua.IPv4Mask.ToString();
+						string gateway = ni.GetIPProperties().GatewayAddresses.FirstOrDefault()?.Address.ToString();
+						int[] subnetMaskArray = subnetMask.Split('.').Select(int.Parse).ToArray();
+						return (ipAddress, subnetMaskArray, gateway);
+					}
+				}
+			}
+		}
+		return (null, null, null);
+	}
 
-    static string FormatMacAddress(byte[] macAddr)
-    {
-        return string.Join(":", macAddr.Select(b => b.ToString("X2")));
-    }
+	static string GetSubnet(string ipAddress)
+	{
+		var segments = ipAddress.Split('.');
+		if (segments.Length == 4)
+		{
+			return $"{segments[0]}.{segments[1]}.{segments[2]}.";
+		}
+		else
+		{
+			throw new FormatException("Invalid IP address format.");
+		}
+	}
 
-    static string GetHostName(string ipAddress)
-    {
-        try
-        {
-            IPHostEntry entry = Dns.GetHostEntry(ipAddress);
-            return entry.HostName;
-        }
-        catch (Exception)
-        {
-            return "Unbekannt";
-        }
-    }
+	static int[] GetSubnetArray(string ipAddress)
+	{
+		var segments = ipAddress.Split('.');
+		if (segments.Length == 4)
+		{
+			return segments.Select(s => int.Parse(s)).ToArray();
+		}
+		else
+		{
+			throw new FormatException("Invalid IP address format.");
+		}
+	}
 
-    public class ByteArrayComparer : IComparer<byte[]>
-    {
-        public int Compare(byte[] x, byte[] y)
-        {
-            for (int i = 0; i < x.Length; i++)
-            {
-                int comparison = x[i].CompareTo(y[i]);
-                if (comparison != 0)
-                    return comparison;
-            }
-            return 0;
-        }
-    }
+	static string FormatMacAddress(byte[] macAddr)
+	{
+		return string.Join(":", macAddr.Select(b => b.ToString("X2")));
+	}
+
+	static string GetHostName(string ipAddress)
+	{
+		try
+		{
+			IPHostEntry entry = Dns.GetHostEntry(ipAddress);
+			return entry.HostName;
+		}
+		catch (Exception)
+		{
+			return "Unbekannt";
+		}
+	}
+
+	static string ExtractOUI(string macAddress)
+	{
+		return string.Join(":", macAddress.Split(':').Take(3));
+	}
+
+	static async Task<string> GetManufacturerFromMac(string macAddress)
+	{
+		string oui = ExtractOUI(macAddress);
+
+		string apiUrl = $"https://api.macvendors.com/{oui.Replace(":", "")}";
+
+		try
+		{
+			using (HttpClient client = new HttpClient())
+			{
+				HttpResponseMessage response = await client.GetAsync(apiUrl);
+				response.EnsureSuccessStatusCode();
+				string manufacturer = await response.Content.ReadAsStringAsync();
+				return manufacturer;
+			}
+		}
+		catch 
+		{
+			return "Unbekannt";
+		}
+	}
 }
