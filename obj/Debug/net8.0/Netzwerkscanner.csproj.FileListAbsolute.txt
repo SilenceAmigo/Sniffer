@@ -36,3 +36,6 @@ C:\Users\dominikus\Documents\Sniffer\Sniffer\obj\Debug\net8.0\Netzwerkscanner.pd
 C:\Users\dominikus\Documents\Sniffer\Sniffer\obj\Debug\net8.0\Netzwerkscanner.genruntimeconfig.cache
 C:\Users\dominikus\Documents\Sniffer\Sniffer\obj\Debug\net8.0\ref\Netzwerkscanner.dll
 C:\Users\Dominik\Documents\Netzwerkscanner\obj\Debug\net8.0\Netzwerkscanner.sourcelink.json
+C:\Users\Dominik\Documents\Netzwerkscanner\bin\Debug\net8.0\Renci.SshNet.dll
+C:\Users\Dominik\Documents\Netzwerkscanner\bin\Debug\net8.0\SnmpSharpNet.dll
+C:\Users\Dominik\Documents\Netzwerkscanner\bin\Debug\net8.0\Newtonsoft.Json.dll

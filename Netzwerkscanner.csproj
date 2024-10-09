@@ -8,8 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PacketDotNet" Version="1.4.7" />
-    <PackageReference Include="SharpPcap" Version="6.3.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="PacketDotNet" Version="0.16.0" />
+    <PackageReference Include="SharpPcap" Version="4.5.0" />
+    <PackageReference Include="SnmpSharpNet" Version="0.9.6" />
+    <PackageReference Include="SSH.NET" Version="2024.1.0" />
+    <EmbeddedResource Include="ports.lists.json" />
   </ItemGroup>
 
 </Project>

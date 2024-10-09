@@ -43,13 +43,25 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            },
             "PacketDotNet": {
               "target": "Package",
-              "version": "[1.4.7, )"
+              "version": "[0.16.0, )"
+            },
+            "SSH.NET": {
+              "target": "Package",
+              "version": "[2024.1.0, )"
             },
             "SharpPcap": {
               "target": "Package",
-              "version": "[6.3.0, )"
+              "version": "[4.5.0, )"
+            },
+            "SnmpSharpNet": {
+              "target": "Package",
+              "version": "[0.9.6, )"
             }
           },
           "imports": [
