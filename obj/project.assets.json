@@ -15,6 +15,22 @@
           }
         }
       },
+      "Newtonsoft.Json.Schema/3.0.14": {
+        "type": "package",
+        "dependencies": {
+          "Newtonsoft.Json": "12.0.3"
+        },
+        "compile": {
+          "lib/netstandard2.0/Newtonsoft.Json.Schema.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/Newtonsoft.Json.Schema.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "PacketDotNet/0.16.0": {
         "type": "package",
         "compile": {
@@ -91,6 +107,29 @@
         "packageIcon.png"
       ]
     },
+    "Newtonsoft.Json.Schema/3.0.14": {
+      "sha512": "Qnu41yEFuMEJMuD1kJgslc4cF981K+hA7SmgXQ/N6pk6Zknvxt4g5Hx7KRykycP3oKyoz3aTFRV/TX+Vp6v7uQ==",
+      "type": "package",
+      "path": "newtonsoft.json.schema/3.0.14",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.md",
+        "lib/net35/Newtonsoft.Json.Schema.dll",
+        "lib/net35/Newtonsoft.Json.Schema.xml",
+        "lib/net40/Newtonsoft.Json.Schema.dll",
+        "lib/net40/Newtonsoft.Json.Schema.xml",
+        "lib/net45/Newtonsoft.Json.Schema.dll",
+        "lib/net45/Newtonsoft.Json.Schema.xml",
+        "lib/netstandard1.3/Newtonsoft.Json.Schema.dll",
+        "lib/netstandard1.3/Newtonsoft.Json.Schema.xml",
+        "lib/netstandard2.0/Newtonsoft.Json.Schema.dll",
+        "lib/netstandard2.0/Newtonsoft.Json.Schema.xml",
+        "newtonsoft.json.schema.3.0.14.nupkg.sha512",
+        "newtonsoft.json.schema.nuspec",
+        "packageIcon.png"
+      ]
+    },
     "PacketDotNet/0.16.0": {
       "sha512": "YCUxECxGHPJsGNqgV8DhgKklbuF+yRYqUu64zbacs1M5r+A3jU+PiTaJfUP8zmYccuMdgf7yDniKRZijQKtq9Q==",
       "type": "package",
@@ -156,6 +195,7 @@
   "projectFileDependencyGroups": {
     "net8.0": [
       "Newtonsoft.Json >= 13.0.3",
+      "Newtonsoft.Json.Schema >= 3.0.14",
       "PacketDotNet >= 0.16.0",
       "SSH.NET >= 2024.1.0",
       "SharpPcap >= 4.5.0",
@@ -207,6 +247,10 @@
           "Newtonsoft.Json": {
             "target": "Package",
             "version": "[13.0.3, )"
+          },
+          "Newtonsoft.Json.Schema": {
+            "target": "Package",
+            "version": "[3.0.14, )"
           },
           "PacketDotNet": {
             "target": "Package",

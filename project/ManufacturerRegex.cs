@@ -3,6 +3,15 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 
+public class ArpEntry
+{
+    public string ip { get; set; }
+    public string mac { get; set; }
+    public string type { get; set; }
+    public string port { get; set; }
+
+}
+
 namespace Netzwerkscanner
 {
     public static class ManufacturerRegex
@@ -40,7 +49,32 @@ namespace Netzwerkscanner
 
                     string arpTable = RegexMatch(result, arpTablePattern);
 
+                    string detailedPattern = @"(\d+\.\d+\.\d+\.\d+)\s+([a-fA-F0-9-]+)\s+(\w+)\s+(\d+)";
 
+                    // Liste für die ARP-Einträge
+                    // Liste für die ARP-Einträge
+                    List<ArpEntry> arpEntries = new List<ArpEntry>();
+
+
+                    // Suche nach allen Übereinstimmungen
+                    MatchCollection matches = Regex.Matches(arpTable, detailedPattern);
+                    foreach (Match matchEntry in matches)
+                    {
+                        // Extrahiere die IP, MAC, Typ und Port
+                        string ip = matchEntry.Groups[1].Value;
+                        string mac = matchEntry.Groups[2].Value;
+                        string type = matchEntry.Groups[3].Value;
+                        string port = matchEntry.Groups[4].Value;
+
+                        // Füge den Eintrag zur Liste hinzu
+                        arpEntries.Add(new ArpEntry
+                        {
+                            ip = ip,
+                            mac = mac,
+                            type = type,
+                            port = port
+                        });
+                    }
 
                     var patterns = new Dictionary<string, string>
                         {
@@ -75,12 +109,13 @@ namespace Netzwerkscanner
 
 
                     InAndOutput.PrintSwitchInfos(manufacturer, model, deviceType, firmwareVersion, result);
-                    InAndOutput.PrintAdvancedSwitchInfos(result, routingRegex, systemInformation, arpTable, runningConfig);
+                    InAndOutput.PrintAdvancedSwitchInfos(result, routingRegex, systemInformation, arpEntries, runningConfig);
+
                 }
             }
             else
             {
-                Console.WriteLine("Konnte den System Name nicht parsen.");
+                Console.WriteLine("Could not parse the system name.");
             }
 
 
@@ -94,7 +129,7 @@ namespace Netzwerkscanner
                     ArubaRegex(result, manufacturer);
                     break;
                 default:
-                    Console.WriteLine($"Kein spezielles Handling für den Hersteller: {manufacturer}");
+                    Console.WriteLine($"No special handling for the manufacturer: {manufacturer}");
                     break;
             }
         }
@@ -116,10 +151,10 @@ namespace Netzwerkscanner
                 // Anhand des Typs eine detaillierte Beschreibung festlegen
                 string description = type switch
                 {
-                    "Packet   - Total" => "Gesamtzahl der Pakete",
-                    "Buffers    Free" => "Verfügbare Puffer für eingehende Pakete",
-                    "Lowest" => "Niedrigste Anzahl an verfügbaren Puffern",
-                    "Missed" => "Verpasste Pakete aufgrund fehlender Puffer",
+                    "Packet   - Total" => "Total number of parcels",
+                    "Buffers    Free" => "Available buffers for incoming packets",
+                    "Lowest" => "Lowest number of available buffers",
+                    "Missed" => "Missed packages due to missing buffers",
                     _ => type // Standardfall: Originalbezeichnung
                 };
 

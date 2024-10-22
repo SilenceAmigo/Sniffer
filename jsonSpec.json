@@ -1,0 +1,190 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "Netzwerk": {
+      "type": "object",
+      "properties": {
+        "LokaleIP": {
+          "type": ["string", "null"],
+          "format": "ipv4"
+        },
+        "Subnetz": {
+          "type": ["string", "null"]
+        },
+        "Netzgroesse": {
+          "type": ["string", "null"]
+        },
+        "Gateway": {
+          "type": ["string", "null"],
+          "format": "ipv4"
+        }
+      },
+      "required": ["LokaleIP", "Subnetz", "Netzgroesse", "Gateway"]
+    },
+    "Hosts": {
+      "type": "array",
+      "items": {},
+      "default": []
+    },
+    "SwitchInfos": {
+      "type": ["object", "null"],
+      "properties": {
+        "Hersteller": {
+          "type": ["string", "null"]
+        },
+        "Modell": {
+          "type": ["string", "null"]
+        },
+        "Gerätetyp": {
+          "type": ["string", "null"]
+        },
+        "FirmwareVersion": {
+          "type": ["string", "null"]
+        },
+        "Ports": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "properties": {
+              "PortNummer": {
+                "type": ["string", "null"]
+              },
+              "PortBeschreibung": {
+                "type": ["string", "null"]
+              }
+            },
+            "required": ["PortNummer", "PortBeschreibung"]
+          }
+        },
+        "Vlans": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "properties": {
+              "VlanName": {
+                "type": ["string", "null"]
+              },
+              "IpAdress": {
+                "type": ["string", "null"],
+                "format": "ipv4"
+              },
+              "SubMask": {
+                "type": ["string", "null"]
+              }
+            },
+            "required": ["VlanName", "IpAdress", "SubMask"]
+          }
+        },
+        "Pakets": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "properties": {
+              "EingehndePakete": {
+                "type": ["string", "null"]
+              },
+              "AusgehendePakete": {
+                "type": ["string", "null"]
+              },
+              "GesamtzahlDerPakete": {
+                "type": ["string", "null"]
+              },
+              "PufferEingehend": {
+                "type": ["string", "null"]
+              },
+              "MinPuffer": {
+                "type": ["string", "null"]
+              },
+              "VerlorenePakete": {
+                "type": ["string", "null"]
+              }
+            },
+            "required": [
+              "EingehndePakete",
+              "AusgehendePakete",
+              "GesamtzahlDerPakete",
+              "PufferEingehend",
+              "MinPuffer",
+              "VerlorenePakete"
+            ]
+          }
+        },
+        "RroutingInfo": {
+          "type": ["object", "null"],
+          "properties": {
+            "IPRouting": {
+              "type": ["string", "null"]
+            },
+            "DefaultGateway": {
+              "type": ["string", "null"],
+              "format": "ipv4"
+            },
+            "DefaultTTL": {
+              "type": ["string", "null"]
+            },
+            "ArpAge": {
+              "type": ["string", "null"]
+            },
+            "DomainSuffix": {
+              "type": ["string", "null"]
+            },
+            "DNSServer": {
+              "type": ["string", "null"],
+              "format": "ipv4"
+            }
+          }
+        },
+        "SystemInformations": {
+          "type": ["object", "null"],
+          "properties": {
+            "BaseMacAddr": {
+              "type": ["string", "null"]
+            },
+            "RomVersion": {
+              "type": ["string", "null"]
+            },
+            "SerialNumber": {
+              "type": ["string", "null"]
+            },
+            "UpTime": {
+              "type": ["string", "null"]
+            },
+            "MemoryTotal": {
+              "type": ["string", "null"]
+            },
+            "Free": {
+              "type": ["string", "null"]
+            },
+            "CpuUtil": {
+              "type": ["string", "null"]
+            }
+          }
+        },
+        "ArpTable": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "properties": {
+              "ip": {
+                "type": ["string", "null"],
+                "format": "ipv4"
+              },
+              "mac": {
+                "type": ["string", "null"]
+              },
+              "type": {
+                "type": ["string", "null"]
+              },
+              "port": {
+                "type": ["string", "null"]
+              }
+            },
+            "required": ["ip", "mac", "type", "port"]
+          }
+        }
+      }
+    }
+  },
+  "required": ["Netzwerk", "Hosts"]
+}

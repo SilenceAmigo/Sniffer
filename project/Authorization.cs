@@ -25,7 +25,7 @@ namespace Netzwerkscanner
 
                     if (sshClient.IsConnected)
                     {
-                        InAndOutput.PrintAndClear("Erfolgreich eingeloggt!");
+                        InAndOutput.PrintAndClear("Successfully logged in!");
 
                         // Starte eine interaktive Shell-Sitzung
                         var shellStream = sshClient.CreateShellStream("dummy", 0, 0, 0, 0, 1000);
@@ -59,14 +59,12 @@ namespace Netzwerkscanner
                     }
                     else
                     {
-                        Console.WriteLine("Login fehlgeschlagen.");
                         return false;
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Fehler beim Verbinden oder Ausführen des Befehls: {ex.Message}");
                 return false;
             }
             finally

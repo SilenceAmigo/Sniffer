@@ -39,3 +39,4 @@ C:\Users\Dominik\Documents\Netzwerkscanner\obj\Debug\net8.0\Netzwerkscanner.sour
 C:\Users\Dominik\Documents\Netzwerkscanner\bin\Debug\net8.0\Renci.SshNet.dll
 C:\Users\Dominik\Documents\Netzwerkscanner\bin\Debug\net8.0\SnmpSharpNet.dll
 C:\Users\Dominik\Documents\Netzwerkscanner\bin\Debug\net8.0\Newtonsoft.Json.dll
+C:\Users\Dominik\Documents\Netzwerkscanner\bin\Debug\net8.0\Newtonsoft.Json.Schema.dll

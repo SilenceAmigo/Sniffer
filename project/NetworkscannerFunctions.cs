@@ -70,7 +70,7 @@ namespace Netzwerkscanner
             return string.Join(":", macAddr.Take(6).Select(b => b.ToString("X2")));
         }
 
-        public static void AddDeviceIfNew(string ip, string macAddress, double latency, SortedDictionary<string, (string MacAddress, string Manufacturer, double Latency)> foundDevices)
+        public static void AddDeviceIfNew(string ip, string macAddress, double latency, Dictionary<string, (string MacAddress, string Manufacturer, double Latency)> foundDevices)
         {
             lock (foundDevices)
             {
@@ -78,7 +78,7 @@ namespace Netzwerkscanner
 
                 if (!foundDevices.ContainsKey(ip))
                 {
-                    string manufacturer = "Unbekannt";
+                    string manufacturer = "Unknown";
                     manufacturer = Task.Run(async () => await GetManufacturerFromMac(macAddress)).Result;
                     foundDevices.Add(ip, (macAddress, manufacturer, latency));
                 }
@@ -92,7 +92,7 @@ namespace Netzwerkscanner
                 // Überprüfe, ob die MAC-Adresse nur aus Nullen besteht
                 if (macAddress.All(c => c == '0' || c == ':'))
                 {
-                    return "Unbekannt";
+                    return "Unknown";
                 }
 
                 // Bereite das MAC-Präfix vor und ersetze ":" durch "-"
@@ -107,7 +107,7 @@ namespace Netzwerkscanner
             }
             catch (Exception)
             {
-                return "Unbekannt";
+                return "Unknown";
             }
         }
 
@@ -156,7 +156,7 @@ namespace Netzwerkscanner
             }
             catch
             {
-                return "Unbekannt";
+                return "Unknown";
             }
         }
 

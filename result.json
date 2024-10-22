@@ -1,0 +1,104 @@
+{
+  "Netzwerk": {
+    "LokaleIP": "10.1.52.11",
+    "Subnetz": "10.1.52.",
+    "Netzgroesse": "/23",
+    "Gateway": "10.1.52.1"
+  },
+  "Hosts": [],
+  "SwitchInfos": {
+    "Hersteller": "Aruba",
+    "Modell": "2930F",
+    "Gerätetyp": "48G-740W-PoEP-4SFP",
+    "FirmwareVersion": "WC.16.11.0003",
+    "Ports": [
+      {
+        "PortNummer": "1",
+        "PortBeschreibung": "TCP Port Service Multiplexer (TCPMUX)"
+      },
+      {
+        "PortNummer": "2",
+        "PortBeschreibung": "CompressNET[2] Management Utility[3]"
+      },
+      {
+        "PortNummer": "3",
+        "PortBeschreibung": "CompressNET[2] Compression Process[4]"
+      },
+      {
+        "PortNummer": "4",
+        "PortBeschreibung": "Unassigned"
+      },
+      {
+        "PortNummer": "5",
+        "PortBeschreibung": "Remote Job Entry"
+      },
+      {
+        "PortNummer": "7",
+        "PortBeschreibung": "Echo Protocol"
+      },
+      {
+        "PortNummer": "14",
+        "PortBeschreibung": "Unassigned"
+      },
+      {
+        "PortNummer": "20",
+        "PortBeschreibung": "FTP data transfer"
+      },
+      {
+        "PortNummer": "29",
+        "PortBeschreibung": "MSG ICP"
+      },
+      {
+        "PortNummer": "33",
+        "PortBeschreibung": "Display Support Protocol"
+      }
+    ],
+    "Vlans": [
+      {
+        "VlanName": "DEFAULT_VLAN",
+        "IpAdress": "10.1.200.187",
+        "SubMask": "255.255.254.0"
+      },
+      {
+        "VlanName": "TestVlan",
+        "IpAdress": "10.1.202.1",
+        "SubMask": "255.255.254.0"
+      }
+    ],
+    "Pakets": [
+      {
+        "EingehndePakete": "864,104",
+        "AusgehendePakete": "31,683",
+        "GesamtzahlDerPakete": "6600",
+        "PufferEingehend": "4345",
+        "MinPuffer": "4334",
+        "VerlorenePakete": "0"
+      }
+    ],
+    "RroutingInfo": {
+      "IPRouting": "Disabled",
+      "DefaultGateway": "10.1.200.1",
+      "DefaultTTL": "64",
+      "ArpAge": "20",
+      "DomainSuffix": "hive.auvesy-mdt",
+      "DNSServer": "10.1.200.2"
+    },
+    "SystemInformations": {
+      "BaseMacAddr": "548028-d0b2c0",
+      "RomVersion": "WC.16.01.0010",
+      "SerialNumber": "CN93K90041",
+      "UpTime": "6",
+      "MemoryTotal": "337,437,184",
+      "Free": "218,321,820",
+      "CpuUtil": "0%"
+    },
+    "ArpTable": [
+      {
+        "ip": "10.1.200.1",
+        "mac": "c84f86-fc000a",
+        "type": "dynamic",
+        "port": "1"
+      }
+    ]
+  }
+}
