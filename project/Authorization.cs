@@ -43,13 +43,11 @@ namespace Netzwerkscanner
                         // Netzwerkinformationen und Routing-Tabellen
                         sshResult += InAndOutput.ExecuteSshCommand("show arp", shellStream);
                         sshResult += InAndOutput.ExecuteSshCommand("show ip", shellStream);
+                        sshResult += InAndOutput.ExecuteSshCommand("show mac-address", shellStream);
                         sshResult += InAndOutput.ExecuteSshCommand("show interface status", shellStream);
                         sshResult += InAndOutput.ExecuteSshCommand("show running-config", shellStream);
                         sshResult += InAndOutput.ExecuteSshCommand("", shellStream);
-
-
-
-
+                        Console.WriteLine("");
                         ManufacturerRegex.CheckRegex(manufacturer, sshResult);
 
 

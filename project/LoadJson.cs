@@ -36,6 +36,24 @@ namespace Netzwerkscanner
 
             return isValid;
         }
+
+        public static string LoadIeeeMacDatabase()
+        {
+            string resourceName = "Netzwerkscanner.IEEEMacAdress.json";
+
+            // Die Assembly der laufenden Anwendung abrufen
+            var assembly = Assembly.GetExecutingAssembly();
+
+            // Eingebettete Ressource als Stream lesen
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+            {
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    string jsonContent = reader.ReadToEnd();
+                    return jsonContent;
+                }
+            }
+        }
     }
 
 }

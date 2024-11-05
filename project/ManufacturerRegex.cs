@@ -1,16 +1,8 @@
-using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
+using Netzwerkscanner.dataModels;
 
-public class ArpEntry
-{
-    public string ip { get; set; }
-    public string mac { get; set; }
-    public string type { get; set; }
-    public string port { get; set; }
 
-}
+
 
 namespace Netzwerkscanner
 {
@@ -18,6 +10,8 @@ namespace Netzwerkscanner
     {
         public static void ArubaRegex(string result, string manufacturer)
         {
+
+
             // Allgemeinerer Regex für Aruba-Geräte, um Hersteller, Modell und Gerätetyp zu erfassen
             string systemNamePattern = @"^(?<Hersteller>Aruba)-(?<Modell>\w+)-(?<Geraetetyp>[\w\-]+)";
 
@@ -41,7 +35,7 @@ namespace Netzwerkscanner
                 // Ausgabe der Switch infos
                 InAndOutput.PrintSwitchInfos(manufacturer, model, deviceType, firmwareVersion, result);
 
-                if (InAndOutput.GetUserInputAnDClearMessage("Möchten Sie Erweiterte Informationen zu dem Switch erhalten?"))
+                if (InAndOutput.GetUserInputAnDClearMessage("Would you like to receive more information about the switch?"))
                 {
 
                     Console.Clear();
@@ -51,7 +45,6 @@ namespace Netzwerkscanner
 
                     string detailedPattern = @"(\d+\.\d+\.\d+\.\d+)\s+([a-fA-F0-9-]+)\s+(\w+)\s+(\d+)";
 
-                    // Liste für die ARP-Einträge
                     // Liste für die ARP-Einträge
                     List<ArpEntry> arpEntries = new List<ArpEntry>();
 
@@ -107,19 +100,37 @@ namespace Netzwerkscanner
 
                     string runningConfig = RegexMatch(result, runningConfigPattern);
 
+                    string inactiveDevicesPattern = @"([0-9a-f]{6}-[0-9a-f]{6}\s+\d+\s+\d+)";
+
+
+
+                    foreach (Match matching in Regex.Matches(result, inactiveDevicesPattern, RegexOptions.Multiline))
+                    {
+                        string matchValue = matching.Groups[1].Value;
+                        string[] parts = matchValue.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        if (!arpTable.Contains(parts[0]))
+                        {
+
+                            Network_Scanner.inactiveDevicesList.Add(new InactiveDevices
+                            {
+                                MacAddress = parts[0],
+                                Port = parts[1],
+                                Vlan = parts[2],
+
+                            });
+                        }
+                    }
+                    InAndOutput.switchInfos.InactiveDevices = Network_Scanner.inactiveDevicesList;
 
                     InAndOutput.PrintSwitchInfos(manufacturer, model, deviceType, firmwareVersion, result);
                     InAndOutput.PrintAdvancedSwitchInfos(result, routingRegex, systemInformation, arpEntries, runningConfig);
 
                 }
             }
-            else
-            {
-                Console.WriteLine("Could not parse the system name.");
-            }
-
 
         }
+
 
         public static void CheckRegex(string manufacturer, string result)
         {

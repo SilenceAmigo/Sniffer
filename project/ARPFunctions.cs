@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Runtime.InteropServices;
 using Netzwerkscanner.dataModels;
+using Newtonsoft.Json;
 
 namespace Netzwerkscanner
 {
@@ -9,6 +10,12 @@ namespace Netzwerkscanner
     {
         [DllImport("iphlpapi.dll", ExactSpelling = true)]
         public static extern int SendARP(int destIp, int srcIp, byte[] macAddr, ref int physicalAddrLen);
+
+        // JSON-Datenbank laden
+        public static string ieeeMacDatabase = LoadJson.LoadIeeeMacDatabase();
+
+        // JSON in Dictionary deserialisieren
+        public static Dictionary<string, List<string>> macDatabase = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(ieeeMacDatabase);
 
         public static async Task<(List<DeviceInfo> foundDevices, double elapsedSeconds)> PerformArpSweepAndMeasureTime(int numOfIps, int[] subnetArray)
         {
@@ -98,7 +105,8 @@ namespace Netzwerkscanner
                 {
                     var macAddress = NetworkscannerFunctions.FormatMacAddress(macAddr);
 
-                    string manufacturer = await NetworkscannerFunctions.GetManufacturerFromMac(macAddress);
+                    string manufacturer = await NetworkscannerFunctions.GetManufacturerFromMacIEEEList(macAddress, macDatabase);
+
 
                     var deviceInfo = new DeviceInfo
                     {

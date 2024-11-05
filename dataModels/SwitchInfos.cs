@@ -27,5 +27,7 @@ namespace Netzwerkscanner.project
 
         public List<ArpEntry> ArpTable { get; set; }
 
+        public List<InactiveDevices> InactiveDevices { get; set; }
+
     }
 }

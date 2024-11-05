@@ -1,10 +1,7 @@
 using System.Security;
 using System.Text.RegularExpressions;
-using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using Renci.SshNet;
-using Newtonsoft.Json;
-using System.IO;
 using Netzwerkscanner.dataModels;
 using Netzwerkscanner.project;
 
@@ -282,7 +279,7 @@ namespace Netzwerkscanner
             Console.Clear();
         }
 
-        public static void PrintFoundDevices(List<DeviceInfo> foundDevices, double elapsedSeconds)
+        public static async Task PrintFoundDevicesAsync(List<DeviceInfo> foundDevices, double elapsedSeconds)
         {
             Console.WriteLine("\n\nDevices found :\n\n");
             int i = 0;
@@ -488,7 +485,7 @@ namespace Netzwerkscanner
             List<string> openPorts = ManufacturerRegex.GetOpenPorts(result);
             Console.WriteLine("Open ports:\n");
 
-            if (openPorts.Count > 0)
+            if (openPorts.Count >= 0)
             {
                 switchInfos.Ports = new List<Port>();
                 foreach (var port in openPorts)
@@ -511,6 +508,16 @@ namespace Netzwerkscanner
                             // Füge das Port-Objekt zur Ports-Liste in switchInfos hinzu
                             switchInfos.Ports.Add(portJson);
                         }
+                    }
+                    else
+                    {
+                        var portNotJson = new Netzwerkscanner.dataModels.Port
+                        {
+                            PortNum = portTrimmed,
+                            PortDescription = "unknown"
+                        };
+                        Console.WriteLine($"-{portTrimmed}\tunknown");
+                        switchInfos.Ports.Add(portNotJson);
                     }
                 }
             }

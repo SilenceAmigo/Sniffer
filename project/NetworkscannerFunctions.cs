@@ -1,10 +1,15 @@
 using System.Net;
+using Microsoft.VisualBasic;
+using Netzwerkscanner.dataModels;
+using Newtonsoft.Json;
 
 namespace Netzwerkscanner
 {
     public static class NetworkscannerFunctions // Eine Klasse hinzufügen
     {
         public static readonly HttpClient client = new HttpClient(); // Reuse HttpClient instance
+
+        private static Dictionary<string, List<string>> ieeeMacDatabase;
 
         public static int CalcSubnetSize(int[] subnetMask)
         {
@@ -70,44 +75,93 @@ namespace Netzwerkscanner
             return string.Join(":", macAddr.Take(6).Select(b => b.ToString("X2")));
         }
 
-        public static void AddDeviceIfNew(string ip, string macAddress, double latency, Dictionary<string, (string MacAddress, string Manufacturer, double Latency)> foundDevices)
-        {
-            lock (foundDevices)
-            {
-                Interlocked.Increment(ref Network_Scanner.count); // Atomically increment count
 
-                if (!foundDevices.ContainsKey(ip))
+
+        // public static async Task<string> GetManufacturerFromMacApi(string mac)
+        // {
+        //     string apiUrl = $"https://api.macvendors.com/{mac}";
+
+        //     using (HttpClient client = new HttpClient())
+        //     {
+        //         try
+        //         {
+        //             // Sende eine GET-Anfrage an die API
+        //             HttpResponseMessage response = await client.GetAsync(apiUrl);
+        //             await Task.Delay(1700); // 1 Sekunde warten zwischen den Anfragen
+
+
+        //             if (response.IsSuccessStatusCode)
+        //             {
+        //                 // Lese die Antwort als String
+        //                 string responseData = await response.Content.ReadAsStringAsync();
+        //                 return responseData;
+        //             }
+        //             else
+        //             {
+        //                 return "Unknown";
+        //             }
+        //         }
+        //         catch (Exception ex)
+        //         {
+        //             return "";
+        //         }
+        //     }
+        // }
+
+        public static async Task<string> GetManufacturerFromMacIEEEList(string macAddr, Dictionary<string, List<string>> macDatabase)
+        {
+            string macPrefix = macAddr.Substring(0, 8).Replace(":", "");
+
+            // Variable für den Hersteller initialisieren
+            string manufacturer = "unknown";
+
+            // Schleife durch das Dictionary, um den Hersteller zu finden, der den Präfix enthält
+            if (macDatabase != null)
+            {
+                foreach (var entry in macDatabase)
                 {
-                    string manufacturer = "Unknown";
-                    manufacturer = Task.Run(async () => await GetManufacturerFromMac(macAddress)).Result;
-                    foundDevices.Add(ip, (macAddress, manufacturer, latency));
+
+                    if (entry.Value.Contains(macPrefix))
+                    {
+                        manufacturer = entry.Key;
+                        return manufacturer;
+                    }
                 }
             }
+            return manufacturer;
+
         }
 
-        public static async Task<string> GetManufacturerFromMac(string macAddress)
+        public static async Task GetManufacturerFromMacIEEEList(List<InactiveDevices> inactiveDevicesList)
         {
-            try
+            // JSON-Datenbank laden
+            string ieeeMacDatabase = LoadJson.LoadIeeeMacDatabase();
+
+            // JSON in Dictionary deserialisieren
+            var macDatabase = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(ieeeMacDatabase);
+
+            // Schleife durch die Liste der inaktiven Geräte
+            foreach (var device in inactiveDevicesList)
             {
-                // Überprüfe, ob die MAC-Adresse nur aus Nullen besteht
-                if (macAddress.All(c => c == '0' || c == ':'))
+                // Die ersten 6 Zeichen der MAC-Adresse erhalten und in Großbuchstaben umwandeln
+                string macPrefix = device.MacAddress.Substring(0, 6).ToUpper();
+
+                // Variable für den Hersteller initialisieren
+                string manufacturer = "unknown";
+
+                // Schleife durch das Dictionary, um den Hersteller zu finden, der den Präfix enthält
+                if (macDatabase != null)
                 {
-                    return "Unknown";
+                    foreach (var entry in macDatabase)
+                    {
+                        if (entry.Value.Contains(macPrefix))
+                        {
+                            manufacturer = entry.Key;
+                            break;
+                        }
+                    }
                 }
-
-                // Bereite das MAC-Präfix vor und ersetze ":" durch "-"
-                string macPrefix = macAddress.Substring(0, 8).Replace(":", "-");
-
-                // Sende die Anfrage an die API
-                HttpResponseMessage response = await client.GetAsync($"https://api.macvendors.com/{macPrefix}");
-                response.EnsureSuccessStatusCode();
-
-                // Lies die Antwort
-                return await response.Content.ReadAsStringAsync();
-            }
-            catch (Exception)
-            {
-                return "Unknown";
+                device.Manufacturer = manufacturer;
             }
         }
 

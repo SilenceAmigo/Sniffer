@@ -12,6 +12,7 @@ namespace Netzwerkscanner.dataModels
         public List<DeviceInfo> Hosts { get; set; }
         public SwitchInfos SwitchInfos { get; set; }
 
+
     }
 
 }
