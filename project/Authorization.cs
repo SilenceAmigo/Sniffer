@@ -47,7 +47,6 @@ namespace Netzwerkscanner
                         sshResult += InAndOutput.ExecuteSshCommand("show interface status", shellStream);
                         sshResult += InAndOutput.ExecuteSshCommand("show running-config", shellStream);
                         sshResult += InAndOutput.ExecuteSshCommand("", shellStream);
-                        Console.WriteLine("");
                         ManufacturerRegex.CheckRegex(manufacturer, sshResult);
 
 

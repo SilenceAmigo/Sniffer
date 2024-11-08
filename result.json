@@ -1,100 +1,11 @@
 {
   "Netzwerk": {
-    "LokaleIP": "192.168.178.195",
-    "Subnetz": "192.168.178.",
-    "NetworkSize": "/24",
-    "Gateway": "192.168.178.1"
+    "LokaleIP": "10.1.52.11",
+    "Subnetz": "10.1.52.",
+    "NetworkSize": "/23",
+    "Gateway": "10.1.52.1"
   },
-  "Hosts": [
-    {
-      "HostNum": "1",
-      "IpAdresse": "192.168.178.1",
-      "MACAdresse": "34:81:C4:BE:C6:72",
-      "Hostname": "fritz.box",
-      "Manufacturer": "AVM GMBH",
-      "Latency": "0,0098807"
-    },
-    {
-      "HostNum": "2",
-      "IpAdresse": "192.168.178.190",
-      "MACAdresse": "0A:B0:84:2A:16:78",
-      "Hostname": "Unknown",
-      "Manufacturer": "unknown",
-      "Latency": "0,1345928"
-    },
-    {
-      "HostNum": "3",
-      "IpAdresse": "192.168.178.194",
-      "MACAdresse": "F0:20:FF:5A:C9:E5",
-      "Hostname": "LD-N0249.fritz.box",
-      "Manufacturer": "INTEL CORPORATE",
-      "Latency": "0,0147399"
-    },
-    {
-      "HostNum": "4",
-      "IpAdresse": "192.168.178.195",
-      "MACAdresse": "00:0C:29:2A:76:B1",
-      "Hostname": "DESKTOP-RQOS2Q6.fritz.box",
-      "Manufacturer": "VMWARE, INC.",
-      "Latency": "0,0001012"
-    },
-    {
-      "HostNum": "5",
-      "IpAdresse": "192.168.178.82",
-      "MACAdresse": "C0:D2:F3:A7:82:8D",
-      "Hostname": "Unknown",
-      "Manufacturer": "unknown",
-      "Latency": "0,0140985"
-    },
-    {
-      "HostNum": "6",
-      "IpAdresse": "192.168.178.87",
-      "MACAdresse": "D8:61:62:F7:35:A3",
-      "Hostname": "COM-MID1.fritz.box",
-      "Manufacturer": "unknown",
-      "Latency": "0,0152348"
-    },
-    {
-      "HostNum": "7",
-      "IpAdresse": "192.168.178.143",
-      "MACAdresse": "20:A1:71:D2:5B:24",
-      "Hostname": "none-2.fritz.box",
-      "Manufacturer": "unknown",
-      "Latency": "0,1398852"
-    },
-    {
-      "HostNum": "8",
-      "IpAdresse": "192.168.178.151",
-      "MACAdresse": "1E:D4:FF:C4:77:E3",
-      "Hostname": "Unknown",
-      "Manufacturer": "unknown",
-      "Latency": "2,1555132"
-    },
-    {
-      "HostNum": "9",
-      "IpAdresse": "192.168.178.45",
-      "MACAdresse": "CE:0E:14:2D:BE:29",
-      "Hostname": "fritz.repeater",
-      "Manufacturer": "unknown",
-      "Latency": "0,0151452"
-    },
-    {
-      "HostNum": "10",
-      "IpAdresse": "192.168.178.115",
-      "MACAdresse": "58:D3:49:13:55:2E",
-      "Hostname": "Dominiks-Ball-58D34913552E.fritz.box",
-      "Manufacturer": "unknown",
-      "Latency": "0,0149416"
-    },
-    {
-      "HostNum": "11",
-      "IpAdresse": "192.168.178.148",
-      "MACAdresse": "EC:2B:EB:04:50:1C",
-      "Hostname": "Android.fritz.box",
-      "Manufacturer": "unknown",
-      "Latency": "0,0302873"
-    }
-  ],
+  "Hosts": [],
   "SwitchInfos": {
     "Manufacturer": "Aruba",
     "Model": "2930F",
@@ -169,8 +80,8 @@
     "Pakets": [
       {
         "TotalNumberOfPackages": null,
-        "IncomingPackages": "2,434,180",
-        "OutgoingPackets": "97,945",
+        "IncomingPackages": "3,149,987",
+        "OutgoingPackets": "119,809",
         "BufferIncoming": null,
         "MinBuffer": null,
         "LostPackets": null
@@ -190,8 +101,8 @@
       "SerialNumber": "CN93K90041",
       "UpTime": "2",
       "MemoryTotal": "337,437,184",
-      "Free": "217,798,424",
-      "CpuUtil": "2%"
+      "Free": "217,879,912",
+      "CpuUtil": "0%"
     },
     "ArpTable": [
       {
@@ -245,20 +156,8 @@
         "Manufacturer": "VMWARE, INC."
       },
       {
-        "MacAddress": "000c29-35bbe4",
+        "MacAddress": "000c29-749149",
         "Port": "4",
-        "Vlan": "1",
-        "Manufacturer": "VMWARE, INC."
-      },
-      {
-        "MacAddress": "000c29-9711e7",
-        "Port": "4",
-        "Vlan": "1",
-        "Manufacturer": "VMWARE, INC."
-      },
-      {
-        "MacAddress": "000c29-a7a45a",
-        "Port": "1",
         "Vlan": "1",
         "Manufacturer": "VMWARE, INC."
       },
@@ -273,12 +172,6 @@
         "Port": "4",
         "Vlan": "1",
         "Manufacturer": "VMWARE, INC."
-      },
-      {
-        "MacAddress": "000e8c-9ed694",
-        "Port": "30",
-        "Vlan": "1",
-        "Manufacturer": "SIEMENS AG A&D ET"
       },
       {
         "MacAddress": "000e8c-aad24a",
@@ -317,13 +210,19 @@
         "Manufacturer": "WAGO KONTAKTTECHNIK GMBH"
       },
       {
-        "MacAddress": "005056-9d0762",
+        "MacAddress": "00409d-45e42c",
+        "Port": "1",
+        "Vlan": "1",
+        "Manufacturer": "DIGIBOARD       ETHERNET-ISDN BRIDGES"
+      },
+      {
+        "MacAddress": "005056-9d0378",
         "Port": "1",
         "Vlan": "1",
         "Manufacturer": "VMWARE, INC."
       },
       {
-        "MacAddress": "005056-9d180e",
+        "MacAddress": "005056-9d0762",
         "Port": "1",
         "Vlan": "1",
         "Manufacturer": "VMWARE, INC."
@@ -354,6 +253,12 @@
       },
       {
         "MacAddress": "005056-9d2d3c",
+        "Port": "1",
+        "Vlan": "1",
+        "Manufacturer": "VMWARE, INC."
+      },
+      {
+        "MacAddress": "005056-9d2d4d",
         "Port": "1",
         "Vlan": "1",
         "Manufacturer": "VMWARE, INC."
@@ -407,12 +312,6 @@
         "Manufacturer": "VMWARE, INC."
       },
       {
-        "MacAddress": "005056-9d6a1b",
-        "Port": "1",
-        "Vlan": "1",
-        "Manufacturer": "VMWARE, INC."
-      },
-      {
         "MacAddress": "005056-9d76b0",
         "Port": "1",
         "Vlan": "1",
@@ -431,31 +330,25 @@
         "Manufacturer": "VMWARE, INC."
       },
       {
-        "MacAddress": "005056-9d7f63",
-        "Port": "1",
-        "Vlan": "1",
-        "Manufacturer": "VMWARE, INC."
-      },
-      {
         "MacAddress": "005056-9d7fb5",
         "Port": "1",
         "Vlan": "1",
         "Manufacturer": "VMWARE, INC."
       },
       {
+        "MacAddress": "005056-9d822b",
+        "Port": "1",
+        "Vlan": "1",
+        "Manufacturer": "VMWARE, INC."
+      },
+      {
+        "MacAddress": "005056-9d8d6d",
+        "Port": "1",
+        "Vlan": "1",
+        "Manufacturer": "VMWARE, INC."
+      },
+      {
         "MacAddress": "005056-9d8fdb",
-        "Port": "1",
-        "Vlan": "1",
-        "Manufacturer": "VMWARE, INC."
-      },
-      {
-        "MacAddress": "005056-9d9388",
-        "Port": "1",
-        "Vlan": "1",
-        "Manufacturer": "VMWARE, INC."
-      },
-      {
-        "MacAddress": "005056-9da08d",
         "Port": "1",
         "Vlan": "1",
         "Manufacturer": "VMWARE, INC."
@@ -533,12 +426,6 @@
         "Manufacturer": "VMWARE, INC."
       },
       {
-        "MacAddress": "005056-9dde7e",
-        "Port": "1",
-        "Vlan": "1",
-        "Manufacturer": "VMWARE, INC."
-      },
-      {
         "MacAddress": "005056-9de0ec",
         "Port": "1",
         "Vlan": "1",
@@ -569,6 +456,18 @@
         "Manufacturer": "VMWARE, INC."
       },
       {
+        "MacAddress": "005056-9df05a",
+        "Port": "1",
+        "Vlan": "1",
+        "Manufacturer": "VMWARE, INC."
+      },
+      {
+        "MacAddress": "005056-9df218",
+        "Port": "1",
+        "Vlan": "1",
+        "Manufacturer": "VMWARE, INC."
+      },
+      {
         "MacAddress": "005056-aabbcc",
         "Port": "1",
         "Vlan": "1",
@@ -585,18 +484,6 @@
         "Port": "1",
         "Vlan": "1",
         "Manufacturer": "TELEMECHANIQUE ELECTRIQUE"
-      },
-      {
-        "MacAddress": "0080f4-234b03",
-        "Port": "1",
-        "Vlan": "1",
-        "Manufacturer": "TELEMECHANIQUE ELECTRIQUE"
-      },
-      {
-        "MacAddress": "00a045-ea1677",
-        "Port": "1",
-        "Vlan": "1",
-        "Manufacturer": "PHOENIX CONTACT ELECTRONICS GMBH"
       },
       {
         "MacAddress": "00a045-ea1678",
@@ -639,12 +526,6 @@
         "Port": "3",
         "Vlan": "1",
         "Manufacturer": "CISCO SYSTEMS, INC"
-      },
-      {
-        "MacAddress": "286336-94ff6c",
-        "Port": "1",
-        "Vlan": "1",
-        "Manufacturer": "SIEMENS AG - INDUSTRIAL AUTOMATION - EWA"
       },
       {
         "MacAddress": "382c4a-b5f466",
@@ -690,6 +571,18 @@
       },
       {
         "MacAddress": "ec74ba-818e1e",
+        "Port": "1",
+        "Vlan": "1",
+        "Manufacturer": "HIRSCHMANN AUTOMATION AND CONTROL GMBH"
+      },
+      {
+        "MacAddress": "ec74ba-818e26",
+        "Port": "1",
+        "Vlan": "1",
+        "Manufacturer": "HIRSCHMANN AUTOMATION AND CONTROL GMBH"
+      },
+      {
+        "MacAddress": "ec74ba-819852",
         "Port": "1",
         "Vlan": "1",
         "Manufacturer": "HIRSCHMANN AUTOMATION AND CONTROL GMBH"
