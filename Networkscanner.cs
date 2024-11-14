@@ -22,8 +22,11 @@ namespace Netzwerkscanner
         public static async Task Main(string[] args)
         {
 
+            
+
             // Netzwerkinformationen abrufen
-            var (localIP, subnetMask, gateway) = NetworkscannerFunctions.GetLocalIPAddressAndSubnetMask();
+            var (localIP, subnetMask, gateway) = NetworkscannerFunctions.SelectNetworkInterface();
+
             if (localIP == null || subnetMask == null)
             {
                 Console.WriteLine("No local IP address or subnet mask found.");

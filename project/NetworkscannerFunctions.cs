@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.NetworkInformation;
 using Microsoft.VisualBasic;
 using Netzwerkscanner.dataModels;
 using Newtonsoft.Json;
@@ -166,40 +167,58 @@ namespace Netzwerkscanner
         }
 
 
-        public static (string localIP, int[] subnetMask, string gateway) GetLocalIPAddressAndSubnetMask()
+
+        public static (string localIP, int[] subnetMask, string gateway) SelectNetworkInterface()
         {
-            string localIP = null;
-            string gateway = null;
-            int[] subnetMask = new int[4];
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
+            var interfaces = new List<(string Name, string IPAddress, int[] SubnetMask, string Gateway)>();
+
+            // Alle Netzwerkschnittstellen durchlaufen
+            foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
             {
-                if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                {
-                    localIP = ip.ToString();
-                }
-            }
-            foreach (System.Net.NetworkInformation.NetworkInterface ni in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
-            {
-                foreach (System.Net.NetworkInformation.UnicastIPAddressInformation ip in ni.GetIPProperties().UnicastAddresses)
+                foreach (UnicastIPAddressInformation ip in ni.GetIPProperties().UnicastAddresses)
                 {
                     if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                     {
-                        if (ip.Address.ToString() == localIP)
+                        var subnetMask = ip.IPv4Mask.ToString().Split('.').Select(int.Parse).ToArray();
+                        string gateway = ni.GetIPProperties().GatewayAddresses
+                            .FirstOrDefault(gw => gw.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)?.Address.ToString();
+                        string macAddress = ni.GetPhysicalAddress().ToString();
+
+                        if (!string.IsNullOrEmpty(ip.Address.ToString()) && !string.IsNullOrEmpty(gateway) && !string.IsNullOrEmpty(macAddress))
                         {
-                            subnetMask = ip.IPv4Mask.ToString().Split('.').Select(int.Parse).ToArray();
+                            interfaces.Add((ni.Name, ip.Address.ToString(), subnetMask, gateway));
                         }
                     }
                 }
-                foreach (System.Net.NetworkInformation.GatewayIPAddressInformation gw in ni.GetIPProperties().GatewayAddresses)
-                {
-                    if (gw.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                    {
-                        gateway = gw.Address.ToString();
-                    }
-                }
             }
-            return (localIP, subnetMask, gateway);
+
+            if (interfaces.Count == 0)
+            {
+                Console.WriteLine("No valid network interfaces found.");
+                return (null, null, null);
+            }
+
+            // Alle gefundenen Schnittstellen anzeigen
+            Console.WriteLine("Available Network Interfaces:");
+            for (int i = 0; i < interfaces.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. Adapter: {interfaces[i].Name}");
+                Console.WriteLine($"   IP Address: {interfaces[i].IPAddress}");
+                Console.WriteLine($"   Subnet Mask: {string.Join(".", interfaces[i].SubnetMask)}");
+                Console.WriteLine($"   Gateway: {interfaces[i].Gateway}");
+                Console.WriteLine("\n");
+            }
+
+            // Benutzer zur Auswahl auffordern
+            Console.Write("Select an adapter by number: ");
+            if (int.TryParse(Console.ReadLine(), out int selection) && selection > 0 && selection <= interfaces.Count)
+            {
+                var selectedInterface = interfaces[selection - 1];
+                return (selectedInterface.IPAddress, selectedInterface.SubnetMask, selectedInterface.Gateway);
+            }
+
+            Console.WriteLine("Invalid selection.");
+            return (null, null, null);
         }
 
         public static string GetHostName(string ipAddress)
