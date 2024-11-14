@@ -21,6 +21,7 @@ namespace Netzwerkscanner
 
         public static async Task Main(string[] args)
         {
+            
 
             // Netzwerkinformationen abrufen
             var (localIP, subnetMask, gateway) = NetworkscannerFunctions.GetLocalIPAddressAndSubnetMask();
