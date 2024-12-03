@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.NetworkInformation;
-using Microsoft.VisualBasic;
 using Netzwerkscanner.dataModels;
 using Newtonsoft.Json;
 
@@ -166,11 +165,44 @@ namespace Netzwerkscanner
             }
         }
 
+        public static async Task GetManufacturerFromMacIEEEList(List<ArpEntry> inactiveDevicesList)
+        {
+            // JSON-Datenbank laden
+            string ieeeMacDatabase = LoadJson.LoadIeeeMacDatabase();
+
+            // JSON in Dictionary deserialisieren
+            var macDatabase = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(ieeeMacDatabase);
+
+            // Schleife durch die Liste der inaktiven Geräte
+            foreach (var device in inactiveDevicesList)
+            {
+                // Die ersten 6 Zeichen der MAC-Adresse erhalten und in Großbuchstaben umwandeln
+                string macPrefix = device.mac.Substring(0, 6).ToUpper();
+
+                // Variable für den Hersteller initialisieren
+                string manufacturer = "unknown";
+
+                // Schleife durch das Dictionary, um den Hersteller zu finden, der den Präfix enthält
+                if (macDatabase != null)
+                {
+                    foreach (var entry in macDatabase)
+                    {
+                        if (entry.Value.Contains(macPrefix))
+                        {
+                            manufacturer = entry.Key;
+                            break;
+                        }
+                    }
+                }
+                device.manufacturer = manufacturer;
+            }
+        }
+
 
 
         public static (string localIP, int[] subnetMask, string gateway) SelectNetworkInterface()
         {
-            var interfaces = new List<(string Name, string IPAddress, int[] SubnetMask, string Gateway)>();
+            var interfaces = new List<NetworkInterfaceInfo>();
 
             // Alle Netzwerkschnittstellen durchlaufen
             foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
@@ -180,13 +212,21 @@ namespace Netzwerkscanner
                     if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                     {
                         var subnetMask = ip.IPv4Mask.ToString().Split('.').Select(int.Parse).ToArray();
+
+                        // Gateway-Adresse ermitteln
                         string gateway = ni.GetIPProperties().GatewayAddresses
                             .FirstOrDefault(gw => gw.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)?.Address.ToString();
-                        string macAddress = ni.GetPhysicalAddress().ToString();
 
-                        if (!string.IsNullOrEmpty(ip.Address.ToString()) && !string.IsNullOrEmpty(gateway) && !string.IsNullOrEmpty(macAddress))
+                        // Nur Schnittstellen mit einem gültigen Gateway hinzufügen
+                        if (!string.IsNullOrEmpty(ip.Address.ToString()) && !string.IsNullOrEmpty(gateway))
                         {
-                            interfaces.Add((ni.Name, ip.Address.ToString(), subnetMask, gateway));
+                            interfaces.Add(new NetworkInterfaceInfo
+                            {
+                                Name = ni.Name,
+                                IPAddress = ip.Address.ToString(),
+                                SubnetMask = subnetMask,
+                                Gateway = gateway
+                            });
                         }
                     }
                 }
@@ -194,12 +234,12 @@ namespace Netzwerkscanner
 
             if (interfaces.Count == 0)
             {
-                Console.WriteLine("No valid network interfaces found.");
+                Console.WriteLine("No valid network interfaces found with a gateway.");
                 return (null, null, null);
             }
 
             // Alle gefundenen Schnittstellen anzeigen
-            Console.WriteLine("Available Network Interfaces:");
+            Console.WriteLine("Available Network Interfaces with Gateway:");
             for (int i = 0; i < interfaces.Count; i++)
             {
                 Console.WriteLine($"{i + 1}. Adapter: {interfaces[i].Name}");
@@ -220,6 +260,7 @@ namespace Netzwerkscanner
             Console.WriteLine("Invalid selection.");
             return (null, null, null);
         }
+
 
         public static string GetHostName(string ipAddress)
         {

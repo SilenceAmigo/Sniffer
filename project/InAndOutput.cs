@@ -35,6 +35,24 @@ namespace Netzwerkscanner
             return input == "y";
         }
 
+        public static void PrintInactiveDevices(List<InactiveDevices> inactiveDevicesList)
+        {
+            Console.WriteLine("\n");
+            Console.WriteLine(new string('─', 80));
+            Console.WriteLine("Inactivedevices in The Subnet");
+            Console.WriteLine(new string('─', 80));
+            // Überschrift mit fester Spaltenbreite
+            Console.WriteLine($"{"MAC Address",-20} {"Port",-10} {"VLAN",-10} {"Manufacturer",-30}");
+            Console.WriteLine(new string('-', 70));  // Trennlinie
+
+            // Geräteinformationen in tabellarischer Form ausgeben
+            foreach (var device in inactiveDevicesList)
+            {
+
+                Console.WriteLine($"{device.MacAddress.ToUpper(),-20} {device.Port,-10} {device.Vlan,-10} {device.Manufacturer,-30}");
+            }
+        }
+
         public static bool GetUserInputAnDClearMessage(string message)
         {
             string input;
@@ -140,9 +158,175 @@ namespace Netzwerkscanner
             return Regex.IsMatch(ipAddress, pattern);
         }
 
-        public static void PrintAdvancedSwitchInfos(string result, Match routingRegex, List<string> systemInformation, List<ArpEntry> arpTable, string runningConfig)
+        public static void PrintArpTable(List<ArpEntry> arpTable)
+        {
+            // ARP-Einträge in der Konsole ausgeben und gleichzeitig in JSON schreiben
+            List<ArpEntry> arpEntriesJson = new List<ArpEntry>(); // Für JSON
+            Console.WriteLine("\n");
+            Console.WriteLine(new string('─', 80));
+            Console.WriteLine("Devices in The Subnet");
+            Console.WriteLine(new string('─', 80));
+
+            Console.WriteLine($"{"Ip Address",-18} {"MAC Address",-20} {"Port",-10} {"Manufacturer",-30}");
+            Console.WriteLine(new string('-', 80));  // Trennlinie
+
+            foreach (var arpEntry in arpTable)
+            {
+                Console.WriteLine($"{arpEntry.ip,-18} {arpEntry.mac,-20} {arpEntry.port,-10} {arpEntry.manufacturer,-30}");
+
+                arpEntriesJson.Add(new ArpEntry
+                {
+                    ip = arpEntry.ip,
+                    mac = arpEntry.mac,
+                    type = arpEntry.type,
+                    port = arpEntry.port,
+                    manufacturer = arpEntry.manufacturer,
+                });
+            }
+
+            switchInfos.ActiveDevices = arpEntriesJson;
+            Console.WriteLine(new string('─', 80));
+        }
+
+
+        public static void PrintAdvancedSwitchInfos(string result, Match routingRegex, List<string> systemInformation, string runningConfig)
         {
             Console.WriteLine("Advanced information:");
+            Console.WriteLine(new string('─', 60));
+
+            string json = LoadJson.LoadEmbeddedJson();
+            // Deserialisiere den JSON-String in ein PortsList-Objekt
+            var portsDictionary = JsonConvert.DeserializeObject<Dictionary<string, List<PortInfo>>>(json);
+
+            // Jetzt die offenen Ports extrahieren und ausgeben
+            List<string> openPorts = ManufacturerRegex.GetOpenPorts(result);
+            Console.WriteLine("Open ports:\n");
+
+            if (openPorts.Count >= 0)
+            {
+                switchInfos.Ports = new List<Port>();
+                foreach (var port in openPorts)
+                {
+                    string portTrimmed = port.Trim(); // Entferne mögliche Leerzeichen
+
+                    // Überprüfe, ob der Port in der portsDictionary vorhanden ist
+                    if (portsDictionary.TryGetValue(portTrimmed, out var portInfoList))
+                    {
+                        foreach (var portInfo in portInfoList)
+                        {
+                            Console.WriteLine($"-{portTrimmed}\t{portInfo.Description}");
+
+                            // Initialisiere das Port-Objekt hier neu, um sicherzustellen, dass es nicht null ist
+                            var portJson = new Netzwerkscanner.dataModels.Port
+                            {
+                                PortNum = portTrimmed,
+                                PortDescription = portInfo.Description
+                            };
+                            // Füge das Port-Objekt zur Ports-Liste in switchInfos hinzu
+                            switchInfos.Ports.Add(portJson);
+                        }
+                    }
+                    else
+                    {
+                        var portNotJson = new Netzwerkscanner.dataModels.Port
+                        {
+                            PortNum = portTrimmed,
+                            PortDescription = "unknown"
+                        };
+                        Console.WriteLine($"-{portTrimmed}\tunknown");
+                        switchInfos.Ports.Add(portNotJson);
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("No open ports found.");
+            }
+
+            Console.WriteLine(new string('─', 60));
+
+            // VLAN-Informationen anzeigen
+            var vlans = ManufacturerRegex.GetVlans(result);
+            if (vlans.Count > 0)
+            {
+                switchInfos.Vlans = new List<Vlan>();
+                // Kopfzeile für die Tabelle
+                Console.WriteLine($"{"VLAN",-20} {"IP Address",-20} {"Subnet Mask",-20}");
+                Console.WriteLine(new string('-', 60)); // Längere Trennlinie
+
+                // Ausgabe jeder Zeile in der Tabelle
+                foreach (var vlan in vlans)
+                {
+                    var vlanJson = new Vlan
+                    {
+                        VlanName = vlan.VlanName,
+                        IpAdress = vlan.Ip,
+                        SubMask = vlan.SubnetMask,
+
+                    };
+                    switchInfos.Vlans.Add(vlanJson);
+                    Console.WriteLine($"{vlan.VlanName,-20} {vlan.Ip,-20} {vlan.SubnetMask,-20}");
+                }
+            }
+
+            Console.WriteLine(new string('─', 60));
+            switchInfos.Pakets = new List<Paket>();
+            // Eingehende und ausgehende Pakete anzeigen
+            var packetCounts = ManufacturerRegex.GetPacketCounts(result);
+            var paket = new Paket();
+            if (packetCounts.Count > 0)
+            {
+                Console.WriteLine("Packets received and sent:\n");
+
+                foreach (var packet in packetCounts)
+                {
+                    Console.WriteLine($"{packet.Key} : {packet.Value}");
+                    if (packet.Key == "Eingehende Pakete")
+                    {
+                        paket.IncomingPackages = packet.Value;
+                    }
+                    else
+                    {
+                        paket.OutgoingPackets = packet.Value;
+                    }
+                }
+                switchInfos.Pakets.Add(paket);
+            }
+            else
+            {
+                Console.WriteLine("No package information found.");
+            }
+
+            var packetDetails = ManufacturerRegex.GetPacketDetails(result);
+            if (packetDetails.Count > 0)
+            {
+                Console.WriteLine("\nPackage details:\n");
+                foreach (var detail in packetDetails)
+                {
+                    Console.WriteLine($"{detail.Key} : {detail.Value}");
+                    if (detail.Key == "Total number of parcels")
+                    {
+                        paket.TotalNumberOfPackages = detail.Value;
+                    }
+                    if (detail.Key == "Available buffers for incoming packets")
+                    {
+                        paket.BufferIncoming = detail.Value;
+                    }
+                    if (detail.Key == "Lowest number of available buffers")
+                    {
+                        paket.MinBuffer = detail.Value;
+                    }
+                    if (detail.Key == "Missed packages due to missing buffers")
+                    {
+                        paket.LostPackets = detail.Value;
+                    }
+
+                }
+            }
+            else
+            {
+                Console.WriteLine("No further package details found.");
+            }
             Console.WriteLine(new string('─', 60));
 
             if (routingRegex.Success)
@@ -229,26 +413,6 @@ namespace Netzwerkscanner
             }
             switchInfos.SystemInformations = systemInformationsJson;
 
-            Console.WriteLine(new string('─', 60));
-            Console.WriteLine("ARP-Table:\n");
-
-            // ARP-Einträge in der Konsole ausgeben und gleichzeitig in JSON schreiben
-            List<ArpEntry> arpEntriesJson = new List<ArpEntry>(); // Für JSON
-
-            foreach (var arpEntry in arpTable)
-            {
-                Console.WriteLine($"IP: {arpEntry.ip}, MAC: {arpEntry.mac}, Typ: {arpEntry.type}, Port: {arpEntry.port}");
-
-                arpEntriesJson.Add(new ArpEntry
-                {
-                    ip = arpEntry.ip,
-                    mac = arpEntry.mac,
-                    type = arpEntry.type,
-                    port = arpEntry.port
-                });
-            }
-
-            switchInfos.ArpTable = arpEntriesJson;
 
             Console.WriteLine(new string('─', 60));
 
@@ -297,9 +461,9 @@ namespace Netzwerkscanner
                     Manufacturer = device.Manufacturer,
                     Latency = device.Latency,
                 });
-                Console.WriteLine($"Host Num {i}\nIp address: {device.IpAdresse}\nMAC-Adresse: {device.MACAdresse}\nHostname: {hostname}\nManufacturer: {device.Manufacturer}\nLatencz: {device.Latency} s\n\n");
+                Console.WriteLine($"Host Num {i}\nIp address: {device.IpAdresse}\nMAC-Adresse: {device.MACAdresse}\nHostname: {hostname}\nManufacturer: {device.Manufacturer}\nLatency: {device.Latency} s\n\n");
             }
-            Console.WriteLine($"\n{i} Hosts found in {elapsedSeconds}");
+            Console.WriteLine($"\n{i} Hosts found in {elapsedSeconds:F2} seconds");
 
         }
 
@@ -477,140 +641,7 @@ namespace Netzwerkscanner
             switchInfos.DeviceType = deviceType;
             switchInfos.FirmwareVersion = firmwareVersion;
 
-            string json = LoadJson.LoadEmbeddedJson();
-            // Deserialisiere den JSON-String in ein PortsList-Objekt
-            var portsDictionary = JsonConvert.DeserializeObject<Dictionary<string, List<PortInfo>>>(json);
 
-            // Jetzt die offenen Ports extrahieren und ausgeben
-            List<string> openPorts = ManufacturerRegex.GetOpenPorts(result);
-            Console.WriteLine("Open ports:\n");
-
-            if (openPorts.Count >= 0)
-            {
-                switchInfos.Ports = new List<Port>();
-                foreach (var port in openPorts)
-                {
-                    string portTrimmed = port.Trim(); // Entferne mögliche Leerzeichen
-
-                    // Überprüfe, ob der Port in der portsDictionary vorhanden ist
-                    if (portsDictionary.TryGetValue(portTrimmed, out var portInfoList))
-                    {
-                        foreach (var portInfo in portInfoList)
-                        {
-                            Console.WriteLine($"-{portTrimmed}\t{portInfo.Description}");
-
-                            // Initialisiere das Port-Objekt hier neu, um sicherzustellen, dass es nicht null ist
-                            var portJson = new Netzwerkscanner.dataModels.Port
-                            {
-                                PortNum = portTrimmed,
-                                PortDescription = portInfo.Description
-                            };
-                            // Füge das Port-Objekt zur Ports-Liste in switchInfos hinzu
-                            switchInfos.Ports.Add(portJson);
-                        }
-                    }
-                    else
-                    {
-                        var portNotJson = new Netzwerkscanner.dataModels.Port
-                        {
-                            PortNum = portTrimmed,
-                            PortDescription = "unknown"
-                        };
-                        Console.WriteLine($"-{portTrimmed}\tunknown");
-                        switchInfos.Ports.Add(portNotJson);
-                    }
-                }
-            }
-            else
-            {
-                Console.WriteLine("No open ports found.");
-            }
-
-            Console.WriteLine(new string('─', 60));
-
-            // VLAN-Informationen anzeigen
-            var vlans = ManufacturerRegex.GetVlans(result);
-            if (vlans.Count > 0)
-            {
-                switchInfos.Vlans = new List<Vlan>();
-                // Kopfzeile für die Tabelle
-                Console.WriteLine($"{"VLAN",-20} {"IP Address",-20} {"Subnet Mask",-20}");
-                Console.WriteLine(new string('-', 60)); // Längere Trennlinie
-
-                // Ausgabe jeder Zeile in der Tabelle
-                foreach (var vlan in vlans)
-                {
-                    var vlanJson = new Vlan
-                    {
-                        VlanName = vlan.VlanName,
-                        IpAdress = vlan.Ip,
-                        SubMask = vlan.SubnetMask,
-
-                    };
-                    switchInfos.Vlans.Add(vlanJson);
-                    Console.WriteLine($"{vlan.VlanName,-20} {vlan.Ip,-20} {vlan.SubnetMask,-20}");
-                }
-            }
-
-            Console.WriteLine(new string('─', 60));
-            switchInfos.Pakets = new List<Paket>();
-            // Eingehende und ausgehende Pakete anzeigen
-            var packetCounts = ManufacturerRegex.GetPacketCounts(result);
-            var paket = new Paket();
-            if (packetCounts.Count > 0)
-            {
-                Console.WriteLine("Packets received and sent:\n");
-
-                foreach (var packet in packetCounts)
-                {
-                    Console.WriteLine($"{packet.Key} : {packet.Value}");
-                    if (packet.Key == "Eingehende Pakete")
-                    {
-                        paket.IncomingPackages = packet.Value;
-                    }
-                    else
-                    {
-                        paket.OutgoingPackets = packet.Value;
-                    }
-                }
-                switchInfos.Pakets.Add(paket);
-            }
-            else
-            {
-                Console.WriteLine("No package information found.");
-            }
-
-            var packetDetails = ManufacturerRegex.GetPacketDetails(result);
-            if (packetDetails.Count > 0)
-            {
-                Console.WriteLine("\nPackage details:\n");
-                foreach (var detail in packetDetails)
-                {
-                    Console.WriteLine($"{detail.Key} : {detail.Value}");
-                    if (detail.Key == "Gesamtzahl der Pakete")
-                    {
-                        paket.TotalNumberOfPackages = detail.Value;
-                    }
-                    if (detail.Key == "Verfügbare Puffer für eingehende Pakete")
-                    {
-                        paket.BufferIncoming = detail.Value;
-                    }
-                    if (detail.Key == "Niedrigste Anzahl an verfügbaren Puffern")
-                    {
-                        paket.MinBuffer = detail.Value;
-                    }
-                    if (detail.Key == "Verpasste Pakete aufgrund fehlender Puffer")
-                    {
-                        paket.LostPackets = detail.Value;
-                    }
-
-                }
-            }
-            else
-            {
-                Console.WriteLine("No further package details found.");
-            }
-            Console.WriteLine(new string('─', 60));
         }
     }
 }

@@ -161,7 +161,7 @@
             }
           }
         },
-        "ArpTable": {
+        "Aktive Devices": {
           "type": ["array", "null"],
           "items": {
             "type": "object",
@@ -178,6 +178,9 @@
               },
               "port": {
                 "type": ["string", "null"]
+              },
+              "manufacturer":{
+                "type": ["string","null"]
               }
             },
             "required": ["ip", "mac", "type", "port"]

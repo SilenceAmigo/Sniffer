@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Netzwerkscanner.dataModels;
 
 namespace Netzwerkscanner.project
@@ -25,7 +21,7 @@ namespace Netzwerkscanner.project
 
         public SystemInformations SystemInformations { get; set; }
 
-        public List<ArpEntry> ArpTable { get; set; }
+        public List<ArpEntry> ActiveDevices { get; set; }
 
         public List<InactiveDevices> InactiveDevices { get; set; }
 

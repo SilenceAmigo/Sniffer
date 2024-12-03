@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace Netzwerkscanner.dataModels
 {
     public class ArpEntry
@@ -11,6 +6,8 @@ namespace Netzwerkscanner.dataModels
         public string mac { get; set; }
         public string type { get; set; }
         public string port { get; set; }
+
+        public string manufacturer { get; set; }
 
     }
 }

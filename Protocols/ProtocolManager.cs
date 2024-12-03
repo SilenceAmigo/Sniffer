@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Netzwerkscanner.dataModels;
 
 namespace Netzwerkscanner.Protocols
@@ -31,7 +28,7 @@ namespace Netzwerkscanner.Protocols
             }
             else
             {
-                Console.WriteLine("Protokoll nicht verfügbar.");
+                Console.WriteLine("Protokoll nicht verfügbar.\n");
                 return (new List<DeviceInfo>(), 0); // Rückgabe eines leeren Tuples
             }
         }

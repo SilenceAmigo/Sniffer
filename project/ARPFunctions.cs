@@ -84,6 +84,7 @@ namespace Netzwerkscanner
         static string CreateIpAddress(int[] subnetArray, int i)
         {
             string subnet = string.Join(".", subnetArray.Take(subnetArray.Length - 1));
+
             return $"{subnet}.{i}";
         }
 

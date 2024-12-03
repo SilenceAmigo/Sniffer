@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
@@ -47,6 +46,7 @@ namespace Netzwerkscanner
                         sshResult += InAndOutput.ExecuteSshCommand("show interface status", shellStream);
                         sshResult += InAndOutput.ExecuteSshCommand("show running-config", shellStream);
                         sshResult += InAndOutput.ExecuteSshCommand("", shellStream);
+
                         ManufacturerRegex.CheckRegex(manufacturer, sshResult);
 
 

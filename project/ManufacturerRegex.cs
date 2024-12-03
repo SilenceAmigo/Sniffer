@@ -8,8 +8,12 @@ namespace Netzwerkscanner
 {
     public static class ManufacturerRegex
     {
+        public static List<InactiveDevices> inactiveDevicesList = new List<InactiveDevices>();
         public static void ArubaRegex(string result, string manufacturer)
         {
+
+
+
 
 
             // Allgemeinerer Regex für Aruba-Geräte, um Hersteller, Modell und Gerätetyp zu erfassen
@@ -39,35 +43,7 @@ namespace Netzwerkscanner
                 {
 
                     Console.Clear();
-                    string arpTablePattern = @"IP ARP table\s+([\s\S]*?)(?=\n\s*\n|\z)";
 
-                    string arpTable = RegexMatch(result, arpTablePattern);
-
-                    string detailedPattern = @"(\d+\.\d+\.\d+\.\d+)\s+([a-fA-F0-9-]+)\s+(\w+)\s+(\d+)";
-
-                    // Liste für die ARP-Einträge
-                    List<ArpEntry> arpEntries = new List<ArpEntry>();
-
-
-                    // Suche nach allen Übereinstimmungen
-                    MatchCollection matches = Regex.Matches(arpTable, detailedPattern);
-                    foreach (Match matchEntry in matches)
-                    {
-                        // Extrahiere die IP, MAC, Typ und Port
-                        string ip = matchEntry.Groups[1].Value;
-                        string mac = matchEntry.Groups[2].Value;
-                        string type = matchEntry.Groups[3].Value;
-                        string port = matchEntry.Groups[4].Value;
-
-                        // Füge den Eintrag zur Liste hinzu
-                        arpEntries.Add(new ArpEntry
-                        {
-                            ip = ip,
-                            mac = mac,
-                            type = type,
-                            port = port
-                        });
-                    }
 
                     var patterns = new Dictionary<string, string>
                         {
@@ -100,9 +76,60 @@ namespace Netzwerkscanner
 
                     string runningConfig = RegexMatch(result, runningConfigPattern);
 
-                    string inactiveDevicesPattern = @"([0-9a-f]{6}-[0-9a-f]{6}\s+\d+\s+\d+)";
+
+                    InAndOutput.switchInfos.InactiveDevices = inactiveDevicesList;
+
+                    InAndOutput.PrintSwitchInfos(manufacturer, model, deviceType, firmwareVersion, result);
+                    InAndOutput.PrintAdvancedSwitchInfos(result, routingRegex, systemInformation, runningConfig);
 
 
+
+
+                }
+                string arpTablePattern = @"IP ARP table\s+([\s\S]*?)(?=\n\s*\n|\z)";
+
+                string arpTable = RegexMatch(result, arpTablePattern);
+
+                string detailedPattern = @"(\d+\.\d+\.\d+\.\d+)\s+([a-fA-F0-9-]+)\s+(\w+)\s+(\d+)";
+
+                // Liste für die ARP-Einträge
+                List<ArpEntry> arpEntries = new List<ArpEntry>();
+
+
+                // Suche nach allen Übereinstimmungen
+                MatchCollection matches = Regex.Matches(arpTable, detailedPattern);
+                foreach (Match matchEntry in matches)
+                {
+                    // Extrahiere die IP, MAC, Typ und Port
+                    string ip = matchEntry.Groups[1].Value;
+                    string mac = matchEntry.Groups[2].Value;
+                    string type = matchEntry.Groups[3].Value;
+                    string port = matchEntry.Groups[4].Value;
+
+
+                    // Füge den Eintrag zur Liste hinzu
+                    arpEntries.Add(new ArpEntry
+                    {
+                        ip = ip,
+                        mac = mac,
+                        type = type,
+                        port = port
+
+                    });
+                }
+                NetworkscannerFunctions.GetManufacturerFromMacIEEEList(arpEntries);
+                if (InAndOutput.GetUserInput("Would you like to see the active Devices in the Subnet?"))
+                {
+                    InAndOutput.PrintArpTable(arpEntries);
+                }
+                string inactiveDevicesPattern = @"([0-9a-f]{6}-[0-9a-f]{6}\s+\d+\s+\d+)";
+
+
+
+
+
+                if (InAndOutput.GetUserInput("Would you like to detect the inactive devices running via this switch?"))
+                {
 
                     foreach (Match matching in Regex.Matches(result, inactiveDevicesPattern, RegexOptions.Multiline))
                     {
@@ -112,7 +139,7 @@ namespace Netzwerkscanner
                         if (!arpTable.Contains(parts[0]))
                         {
 
-                            Network_Scanner.inactiveDevicesList.Add(new InactiveDevices
+                            inactiveDevicesList.Add(new InactiveDevices
                             {
                                 MacAddress = parts[0],
                                 Port = parts[1],
@@ -121,12 +148,13 @@ namespace Netzwerkscanner
                             });
                         }
                     }
-                    InAndOutput.switchInfos.InactiveDevices = Network_Scanner.inactiveDevicesList;
+                    // Rufe die Methode asynchron auf, um Herstellerinformationen zu ergänzen
+                    NetworkscannerFunctions.GetManufacturerFromMacIEEEList(inactiveDevicesList);
 
-                    InAndOutput.PrintSwitchInfos(manufacturer, model, deviceType, firmwareVersion, result);
-                    InAndOutput.PrintAdvancedSwitchInfos(result, routingRegex, systemInformation, arpEntries, runningConfig);
-
+                    InAndOutput.PrintInactiveDevices(inactiveDevicesList);
                 }
+
+
             }
 
         }
@@ -171,7 +199,6 @@ namespace Netzwerkscanner
 
                 packetDetails.Add(description, value);
             }
-
             return packetDetails;
         }
 
