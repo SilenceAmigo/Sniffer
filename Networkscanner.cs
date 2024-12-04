@@ -5,6 +5,7 @@ using Netzwerkscanner.dataModels;
 using Netzwerkscanner.Protocols;
 using System.Net.NetworkInformation;
 using System.Text;
+using Netzwerkscanner.project;
 
 namespace Netzwerkscanner
 {
@@ -20,6 +21,7 @@ namespace Netzwerkscanner
 
         public static async Task Main(string[] args)
         {
+
             NetzwerkInfo netzwerkInfo = new NetzwerkInfo { };
 
             bool scanSubnet = InAndOutput.GetUserInput("Would you like to scan a Network?");
@@ -137,9 +139,15 @@ namespace Netzwerkscanner
 
             }
 
+            // Festlegen des Projektverzeichnisses, indem du zwei Verzeichnisebenen nach oben gehst
+            string projectDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..");
+
+            // Auflösen des Pfads, um den tatsächlichen Projektverzeichnis-Pfad zu erhalten
+            projectDirectory = Path.GetFullPath(projectDirectory);
+
 
             // JSON-Schema Validierung und Speichern
-            string schemaPath = "C:\\Users\\Dominik\\Documents\\Netzwerkscanner\\jsonSpec.json";
+            string schemaPath = Path.Combine(projectDirectory, "jsonSpec.json");
             string schemaJson = File.ReadAllText(schemaPath);
 
             // JSON-Schema laden
@@ -148,36 +156,11 @@ namespace Netzwerkscanner
             // Konvertiere die Daten in JSON
             string json = JsonConvert.SerializeObject(data, Formatting.Indented);
 
-            string dataPath = "C:\\Users\\Dominik\\Documents\\Netzwerkscanner\\result.json";
+            string dataPath = Path.Combine(projectDirectory, "result.json");
             File.WriteAllText(dataPath, json);
 
-            // await SendDataToRestServer(json, "Restserver Domain");
+            // await DataToRestServer.SendDataToRestServer(json, "Restserver Domain");
 
-        }
-        public static async Task SendDataToRestServer(string jsonData, string url)
-        {
-            using (var client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-
-                try
-                {
-                    var response = await client.PostAsync(url, content);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        Console.WriteLine("Data successfully sent to REST server.");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Failed to send data. Status code: {response.StatusCode}");
-                    }
-                }
-                catch (HttpRequestException e)
-                {
-                    Console.WriteLine($"Request error: {e.Message}");
-                }
-            }
         }
     }
 
